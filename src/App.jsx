@@ -31,7 +31,7 @@ const LandingPage = () => {
         
         <div className="scene-container">
           <img 
-            src="https://www.usnews.com/object/image/00000174-c726-dd7c-a577-f7ee65ec0000/c21roadbos-northeastern-editorial.bos_northeastern.JPG?update-time=1601069085351&size=responsive640" 
+            src="src/assets/KrentzmanQuad.jpg" 
             alt="Study Space Scene" 
             className="scene-image"
           />
@@ -40,11 +40,11 @@ const LandingPage = () => {
         <div className="info-section">
           <div className="info-card">
             <h2>About Us</h2>
-            <p>Learn more about StudySphere and our mission to help students find the perfect study spaces.</p>
+            <p>StudySphere is a project we made to help students find the perfect study spaces throughout Northeastern University.</p>
           </div>
           <div className="info-card">
             <h2>Descriptions</h2>
-            <p>Discover various study spaces with detailed descriptions and amenities.</p>
+            <p>Discover various study spaces with detailed descriptions and amenities found by other Northeastern students.</p>
           </div>
         </div>
       </main>
