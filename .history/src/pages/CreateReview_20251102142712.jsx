@@ -147,7 +147,9 @@ const CreateReview = () => {
         spotId = existingSpot.spot_id;
         console.log('Using existing spot:', spotId);
       } else {
-        // Get the highest spot_id to generate the next one
+        // Create new StudySpot - get next ID
+        console.log('Creating new spot with location_id:', locationIdInt);
+        
         const { data: maxSpotData } = await supabase
           .from('StudySpot')
           .select('spot_id')
@@ -155,10 +157,7 @@ const CreateReview = () => {
           .limit(1);
         
         const nextSpotId = maxSpotData && maxSpotData.length > 0 ? maxSpotData[0].spot_id + 1 : 1;
-        console.log('Next spot ID will be:', nextSpotId);
-
-        // Create new StudySpot with explicit ID
-        console.log('Creating new spot with location_id:', locationIdInt);
+        
         const { data: newSpot, error: spotError } = await supabase
           .from('StudySpot')
           .insert({
@@ -166,7 +165,8 @@ const CreateReview = () => {
             name: studySpotName,
             location_id: locationIdInt,
             average_rating: 0,
-            total_reviews: 0
+            total_reviews: 0,
+            created_at: new Date().toISOString()
           })
           .select()
           .single();
@@ -198,20 +198,9 @@ const CreateReview = () => {
         }
       }
 
-      // Get the highest review_id to generate the next one
-      const { data: maxReviewData } = await supabase
-        .from('Reviews')
-        .select('review_id')
-        .order('review_id', { ascending: false })
-        .limit(1);
-      
-      const nextReviewId = maxReviewData && maxReviewData.length > 0 ? maxReviewData[0].review_id + 1 : 1;
-      console.log('Next review ID will be:', nextReviewId);
-
       // Create the review
       console.log('Creating review with:', {
-        review_id: nextReviewId,
-        user_id: userIdInt,
+        user_id: userId,
         spot_id: spotId,
         rating: rating,
         review_text: reviewText
@@ -220,8 +209,7 @@ const CreateReview = () => {
       const { data: reviewData, error: reviewError } = await supabase
         .from('Reviews')
         .insert({
-          review_id: nextReviewId,
-          user_id: userIdInt,
+          user_id: userId,
           spot_id: spotId,
           rating: rating,
           review_text: reviewText,
@@ -239,32 +227,19 @@ const CreateReview = () => {
 
       // If there's an uploaded image, save it to Photos table
       if (uploadedImage && reviewData) {
-        // Get the highest photo_id to generate the next one
-        const { data: maxPhotoData } = await supabase
-          .from('Photos')
-          .select('photo_id')
-          .order('photo_id', { ascending: false })
-          .limit(1);
-        
-        const nextPhotoId = maxPhotoData && maxPhotoData.length > 0 ? maxPhotoData[0].photo_id + 1 : 1;
-        console.log('Next photo ID will be:', nextPhotoId);
-
         // For now, we'll store the base64 data URL
         // In production, you'd want to upload to Supabase Storage first
         const { error: photoError } = await supabase
           .from('Photos')
           .insert({
-            photo_id: nextPhotoId,
             review_id: reviewData.review_id,
             photo_url: uploadedImage,
-            uploaded_at: new Date().toISOString()
+            uploaded_at: new Date()
           });
 
         if (photoError) {
           console.error('Error uploading photo:', photoError);
           // Don't throw here - the review was created successfully
-        } else {
-          console.log('Photo uploaded successfully with ID:', nextPhotoId);
         }
       }
 

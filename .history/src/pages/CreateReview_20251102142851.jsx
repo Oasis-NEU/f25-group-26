@@ -239,32 +239,19 @@ const CreateReview = () => {
 
       // If there's an uploaded image, save it to Photos table
       if (uploadedImage && reviewData) {
-        // Get the highest photo_id to generate the next one
-        const { data: maxPhotoData } = await supabase
-          .from('Photos')
-          .select('photo_id')
-          .order('photo_id', { ascending: false })
-          .limit(1);
-        
-        const nextPhotoId = maxPhotoData && maxPhotoData.length > 0 ? maxPhotoData[0].photo_id + 1 : 1;
-        console.log('Next photo ID will be:', nextPhotoId);
-
         // For now, we'll store the base64 data URL
         // In production, you'd want to upload to Supabase Storage first
         const { error: photoError } = await supabase
           .from('Photos')
           .insert({
-            photo_id: nextPhotoId,
             review_id: reviewData.review_id,
             photo_url: uploadedImage,
-            uploaded_at: new Date().toISOString()
+            uploaded_at: new Date()
           });
 
         if (photoError) {
           console.error('Error uploading photo:', photoError);
           // Don't throw here - the review was created successfully
-        } else {
-          console.log('Photo uploaded successfully with ID:', nextPhotoId);
         }
       }
 
