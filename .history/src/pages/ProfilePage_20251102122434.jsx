@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../supabaseClient';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -12,78 +11,14 @@ const ProfilePage = () => {
   const [favoriteSpotName, setFavoriteSpotName] = useState('');
   const [favoriteSpotId, setFavoriteSpotId] = useState('');
   const [profilePic, setProfilePic] = useState(null);
-  const [loading, setLoading] = useState(true);
   
-  // Get username from email (part before @)
-  const username = user?.email ? user.email.split('@')[0] : 'username';
-  
-  useEffect(() => {
-    // Load user profile data from Supabase if you have a profiles table
-    const loadProfile = async () => {
-      if (!user) return;
-      
-      try {
-        // If you have a profiles table in Supabase, uncomment this:
-        /*
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        
-        if (data) {
-          setBio(data.bio || 'add bio here!');
-          setFavoriteSpotName(data.favorite_spot_name || '');
-          setFavoriteSpotId(data.favorite_spot_id || '');
-          setProfilePic(data.avatar_url || null);
-        }
-        */
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading profile:', error);
-        setLoading(false);
-      }
-    };
-    
-    loadProfile();
-  }, [user]);
-  
-  const handleLogout = async () => {
-    await signOut();
+  const handleLogout = () => {
+    signOut();
     navigate('/');
   };
 
-  const handleSaveProfile = async () => {
-    if (!user) return;
-    
-    try {
-      // If you have a profiles table in Supabase, uncomment this:
-      /*
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          bio: bio,
-          favorite_spot_name: favoriteSpotName,
-          favorite_spot_id: favoriteSpotId,
-          avatar_url: profilePic,
-          updated_at: new Date().toISOString(),
-        });
-      
-      if (error) {
-        console.error('Error saving profile:', error);
-        alert('Failed to save profile');
-      } else {
-        alert('Profile saved successfully!');
-      }
-      */
-      
-      // For now, just close edit mode
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      alert('Failed to save profile');
-    }
+  const handleSaveProfile = () => {
+    setIsEditing(false);
   };
 
   const handleProfilePicChange = (e) => {
@@ -94,27 +29,6 @@ const ProfilePage = () => {
         setProfilePic(reader.result);
       };
       reader.readAsDataURL(file);
-      
-      // If you want to upload to Supabase Storage:
-      /*
-      const uploadAvatar = async () => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, file);
-        
-        if (!uploadError) {
-          const { data } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(fileName);
-          
-          setProfilePic(data.publicUrl);
-        }
-      };
-      uploadAvatar();
-      */
     }
   };
 
@@ -123,10 +37,6 @@ const ProfilePage = () => {
     { id: 2, image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=300', spotId: 'isec-1' },
     { id: 3, image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=300', spotId: 'bookstore' }
   ];
-
-  if (loading) {
-    return <div className="loading-container">Loading profile...</div>;
-  }
 
   return (
     <div className="profile-container">
@@ -165,7 +75,7 @@ const ProfilePage = () => {
             </label>
             
             <div className="profile-details">
-              <h2>@{username}</h2>
+              <h2>@{user?.username || 'username'}</h2>
               <p className="email">• {user?.email || 'email address'}</p>
               
               <div className="profile-actions">
