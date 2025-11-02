@@ -28,11 +28,12 @@ const LoginPage = () => {
       <div className="login-box">
         <div className="login-header">
           <h1 className="logo">StudySphere</h1>
+          <button className="header-login-btn">Login</button>
         </div>
         
         <div className="login-content">
           <div className="login-form-container">
-            <h2>Welcome!</h2>
+            <h2>Welcome Back!</h2>
             
             <form onSubmit={handleSubmit}>
               <input

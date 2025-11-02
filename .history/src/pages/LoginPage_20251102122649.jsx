@@ -32,7 +32,7 @@ const LoginPage = () => {
         
         <div className="login-content">
           <div className="login-form-container">
-            <h2>Welcome!</h2>
+            <h2>Welcome Back!</h2>
             
             <form onSubmit={handleSubmit}>
               <input
