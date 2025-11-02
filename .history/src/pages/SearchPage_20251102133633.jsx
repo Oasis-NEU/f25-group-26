@@ -19,46 +19,66 @@ const SearchPage = () => {
   const fetchStudySpots = async () => {
     try {
       setLoading(true);
-      setError(null);
       
-      // Simple query - just fetch study spots first
+      // First, fetch study spots with locations
       const { data: spotsData, error: spotsError } = await supabase
         .from('StudySpot')
-        .select('*')
+        .select(`
+          spot_id,
+          name,
+          average_rating,
+          total_reviews,
+          location_id
+        `)
         .order('name');
 
       if (spotsError) throw spotsError;
 
-      // If we have spots, try to get their locations
-      let locationsMap = {};
-      if (spotsData && spotsData.length > 0) {
-        const { data: locData } = await supabase
-          .from('Locations')
-          .select('location_id, building_area');
-        
-        if (locData) {
-          locData.forEach(loc => {
-            locationsMap[loc.location_id] = loc.building_area;
-          });
-        }
+      // Fetch locations separately
+      const { data: locationsData, error: locationsError } = await supabase
+        .from('Locations')
+        .select('location_id, building_area');
+
+      if (locationsError) console.error('Error fetching locations:', locationsError);
+
+      // Fetch hours separately
+      const { data: hoursData, error: hoursError } = await supabase
+        .from('SpotHours')
+        .select('spot_id, open_time, close_time, is_closed');
+
+      if (hoursError) console.error('Error fetching hours:', hoursError);
+
+      // Create lookup maps
+      const locationsMap = {};
+      if (locationsData) {
+        locationsData.forEach(loc => {
+          locationsMap[loc.location_id] = loc.building_area;
+        });
       }
 
-      // Transform the data with what we have
-      const transformedSpots = (spotsData || []).map(spot => ({
+      const hoursMap = {};
+      if (hoursData) {
+        hoursData.forEach(hour => {
+          if (!hoursMap[hour.spot_id]) {
+            hoursMap[hour.spot_id] = [];
+          }
+          hoursMap[hour.spot_id].push(hour);
+        });
+      }
+
+      // Transform the data
+      const transformedSpots = spotsData.map(spot => ({
         id: spot.spot_id,
-        name: spot.name || 'Unnamed Spot',
-        hours: 'Check for hours',  // Simplified for now
-        building: locationsMap[spot.location_id] || 'Campus',
+        name: spot.name,
+        hours: formatHours(hoursMap[spot.spot_id]),
+        building: locationsMap[spot.location_id] || '',
         averageRating: spot.average_rating || 0,
         totalReviews: spot.total_reviews || 0,
+        // Use a default image or you can add an image_url field to your StudySpot table
         image: `https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&h=150&fit=crop`
       }));
 
       setStudySpots(transformedSpots);
-      
-      if (transformedSpots.length === 0) {
-        setError('No study spots found in database');
-      }
     } catch (error) {
       console.error('Error fetching study spots:', error);
       setError(error.message);

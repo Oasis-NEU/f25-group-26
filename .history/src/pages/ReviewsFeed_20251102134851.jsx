@@ -37,7 +37,10 @@ const ReviewsFeed = () => {
           StudySpot (
             name,
             average_rating,
-            location_id
+            location_id,
+            Locations (
+              building_area
+            )
           ),
           Photos (
             photo_id,
@@ -56,6 +59,7 @@ const ReviewsFeed = () => {
         rating: review.rating,
         images: getReviewImages(review.Photos),
         studySpotName: review.StudySpot?.name || 'Unknown Location',
+        studySpotLocation: review.StudySpot?.Locations?.building_area || '',
         review: review.review_text,
         spotId: review.spot_id,
         createdAt: review.created_at
@@ -249,9 +253,20 @@ const ReviewsFeed = () => {
                   <h3 
                     className="study-spot-name"
                     onClick={() => review.spotId && navigate(`/studyspot/${review.spotId}`)}
+                    style={{ marginBottom: '8px' }}
                   >
                     {review.studySpotName}
                   </h3>
+                  {review.studySpotLocation && (
+                    <div style={{ 
+                      color: 'rgba(255, 255, 255, 0.8)', 
+                      fontSize: '16px',
+                      marginBottom: '20px',
+                      fontWeight: '500'
+                    }}>
+                      📍 {review.studySpotLocation}
+                    </div>
+                  )}
                   <div className="review-text">
                     <p>{review.review || 'No review text provided.'}</p>
                     {review.createdAt && (

@@ -19,46 +19,42 @@ const SearchPage = () => {
   const fetchStudySpots = async () => {
     try {
       setLoading(true);
-      setError(null);
       
-      // Simple query - just fetch study spots first
-      const { data: spotsData, error: spotsError } = await supabase
+      // Fetch all study spots with their locations and hours
+      const { data, error } = await supabase
         .from('StudySpot')
-        .select('*')
+        .select(`
+          spot_id,
+          name,
+          average_rating,
+          total_reviews,
+          location_id,
+          Locations (
+            building_area
+          ),
+          SpotHours (
+            open_time,
+            close_time,
+            is_closed
+          )
+        `)
         .order('name');
 
-      if (spotsError) throw spotsError;
+      if (error) throw error;
 
-      // If we have spots, try to get their locations
-      let locationsMap = {};
-      if (spotsData && spotsData.length > 0) {
-        const { data: locData } = await supabase
-          .from('Locations')
-          .select('location_id, building_area');
-        
-        if (locData) {
-          locData.forEach(loc => {
-            locationsMap[loc.location_id] = loc.building_area;
-          });
-        }
-      }
-
-      // Transform the data with what we have
-      const transformedSpots = (spotsData || []).map(spot => ({
+      // Transform the data
+      const transformedSpots = data.map(spot => ({
         id: spot.spot_id,
-        name: spot.name || 'Unnamed Spot',
-        hours: 'Check for hours',  // Simplified for now
-        building: locationsMap[spot.location_id] || 'Campus',
+        name: spot.name,
+        hours: formatHours(spot.SpotHours),
+        building: spot.Locations?.building_area || '',
         averageRating: spot.average_rating || 0,
         totalReviews: spot.total_reviews || 0,
+        // Use a default image or you can add an image_url field to your StudySpot table
         image: `https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&h=150&fit=crop`
       }));
 
       setStudySpots(transformedSpots);
-      
-      if (transformedSpots.length === 0) {
-        setError('No study spots found in database');
-      }
     } catch (error) {
       console.error('Error fetching study spots:', error);
       setError(error.message);

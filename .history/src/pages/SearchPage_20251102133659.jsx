@@ -21,44 +21,26 @@ const SearchPage = () => {
       setLoading(true);
       setError(null);
       
-      // Simple query - just fetch study spots first
-      const { data: spotsData, error: spotsError } = await supabase
+      // Simple query - just fetch study spots
+      const { data, error } = await supabase
         .from('StudySpot')
         .select('*')
         .order('name');
 
-      if (spotsError) throw spotsError;
+      if (error) throw error;
 
-      // If we have spots, try to get their locations
-      let locationsMap = {};
-      if (spotsData && spotsData.length > 0) {
-        const { data: locData } = await supabase
-          .from('Locations')
-          .select('location_id, building_area');
-        
-        if (locData) {
-          locData.forEach(loc => {
-            locationsMap[loc.location_id] = loc.building_area;
-          });
-        }
-      }
-
-      // Transform the data with what we have
-      const transformedSpots = (spotsData || []).map(spot => ({
+      // Transform the data with default values
+      const transformedSpots = (data || []).map(spot => ({
         id: spot.spot_id,
         name: spot.name || 'Unnamed Spot',
-        hours: 'Check for hours',  // Simplified for now
-        building: locationsMap[spot.location_id] || 'Campus',
+        hours: 'Check for hours',  // Default hours text
+        building: '',  // We'll update this if needed
         averageRating: spot.average_rating || 0,
         totalReviews: spot.total_reviews || 0,
         image: `https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&h=150&fit=crop`
       }));
 
       setStudySpots(transformedSpots);
-      
-      if (transformedSpots.length === 0) {
-        setError('No study spots found in database');
-      }
     } catch (error) {
       console.error('Error fetching study spots:', error);
       setError(error.message);
@@ -67,32 +49,8 @@ const SearchPage = () => {
     }
   };
 
-  const formatHours = (spotHours) => {
-    if (!spotHours || spotHours.length === 0) return 'Hours not available';
-    
-    const hours = spotHours[0];
-    if (hours.is_closed) return 'Closed';
-    
-    if (hours.open_time && hours.close_time) {
-      // Format the time strings
-      const formatTime = (time) => {
-        if (!time) return '';
-        const [hour, minute] = time.split(':');
-        const h = parseInt(hour);
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
-        return `${displayHour}:${minute} ${ampm}`;
-      };
-      
-      return `${formatTime(hours.open_time)} - ${formatTime(hours.close_time)}`;
-    }
-    
-    return '24/7';
-  };
-
   const filteredSpots = studySpots.filter(spot =>
-    spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    spot.building.toLowerCase().includes(searchQuery.toLowerCase())
+    spot.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleLogout = () => {
@@ -153,7 +111,7 @@ const SearchPage = () => {
           
           <input
             type="text"
-            placeholder="Search for study spots by name or building..."
+            placeholder="Search for study spots by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -163,9 +121,12 @@ const SearchPage = () => {
             <div style={{ 
               color: '#ef4444', 
               textAlign: 'center', 
-              marginBottom: '20px' 
+              marginBottom: '20px',
+              padding: '10px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              borderRadius: '10px'
             }}>
-              {error}
+              Error: {error}
             </div>
           )}
           
@@ -176,7 +137,9 @@ const SearchPage = () => {
                 color: 'rgba(255, 255, 255, 0.7)',
                 padding: '40px'
               }}>
-                {searchQuery ? 'No study spots found matching your search.' : 'No study spots available.'}
+                {studySpots.length === 0 
+                  ? 'No study spots in database. Please add some study spots first.' 
+                  : 'No study spots found matching your search.'}
               </div>
             ) : (
               filteredSpots.map(spot => (
@@ -188,15 +151,6 @@ const SearchPage = () => {
                   <img src={spot.image} alt={spot.name} className="spot-thumbnail" />
                   <div style={{ flex: 1 }}>
                     <span className="spot-name">{spot.name}</span>
-                    {spot.building && (
-                      <div style={{ 
-                        color: 'rgba(255, 255, 255, 0.7)', 
-                        fontSize: '14px',
-                        marginTop: '4px'
-                      }}>
-                        {spot.building}
-                      </div>
-                    )}
                     <div style={{ 
                       display: 'flex', 
                       alignItems: 'center', 

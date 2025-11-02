@@ -20,7 +20,7 @@ const ReviewsFeed = () => {
     try {
       setLoading(true);
       
-      // Fetch reviews with related data - simplified query
+      // Fetch reviews with related data
       const { data, error } = await supabase
         .from('Reviews')
         .select(`
@@ -28,18 +28,21 @@ const ReviewsFeed = () => {
           rating,
           review_text,
           created_at,
-          user_id,
-          spot_id,
-          Users (
+          user:Users!user_id (
+            user_id,
             username,
             email
           ),
-          StudySpot (
+          spot:StudySpot!spot_id (
+            spot_id,
             name,
             average_rating,
-            location_id
+            location:Locations!location_id (
+              building_area,
+              location_id
+            )
           ),
-          Photos (
+          photos:Photos (
             photo_id,
             photo_url,
             photo2_url
@@ -52,12 +55,12 @@ const ReviewsFeed = () => {
       // Transform the data to match your component structure
       const transformedReviews = data.map(review => ({
         id: review.review_id,
-        username: review.Users?.username || review.Users?.email?.split('@')[0] || 'anonymous',
+        username: review.user?.username || review.user?.email?.split('@')[0] || 'anonymous',
         rating: review.rating,
-        images: getReviewImages(review.Photos),
-        studySpotName: review.StudySpot?.name || 'Unknown Location',
+        images: getReviewImages(review.photos),
+        studySpotName: review.spot?.name || 'Unknown Location',
         review: review.review_text,
-        spotId: review.spot_id,
+        spotId: review.spot?.spot_id,
         createdAt: review.created_at
       }));
 
