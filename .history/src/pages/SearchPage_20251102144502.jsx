@@ -29,36 +29,43 @@ const SearchPage = () => {
 
       if (locationsError) throw locationsError;
 
-      // For each location, get the most recent review with a photo
+      // For each location, get a photo from the Photos table
       const locationsWithPhotos = await Promise.all(
         (locationsData || []).map(async (location) => {
-          // Get most recent review for this location
-          const { data: recentReview } = await supabase
-            .from('Reviews')
-            .select(`
-              review_id,
-              created_at,
-              StudySpot!inner (
-                location_id
-              ),
-              Photos (
-                photo_url,
-                photo2_url
-              )
-            `)
-            .eq('StudySpot.location_id', location.location_id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
+          // Get study spots in this location
+          const { data: spotsData } = await supabase
+            .from('StudySpot')
+            .select('spot_id')
+            .eq('location_id', location.location_id);
 
-          // Get photo from the review
           let photoUrl = 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&h=150&fit=crop';
-          if (recentReview && recentReview.Photos && recentReview.Photos.length > 0) {
-            const photo = recentReview.Photos[0];
-            if (photo.photo_url) {
-              photoUrl = photo.photo_url;
-            } else if (photo.photo2_url) {
-              photoUrl = photo.photo2_url;
+
+          if (spotsData && spotsData.length > 0) {
+            const spotIds = spotsData.map(s => s.spot_id);
+
+            // Get a review from these spots that has a photo
+            const { data: reviewWithPhoto } = await supabase
+              .from('Reviews')
+              .select(`
+                review_id,
+                Photos (
+                  photo_url,
+                  photo2_url
+                )
+              `)
+              .in('spot_id', spotIds)
+              .not('Photos', 'is', null)
+              .limit(1)
+              .single();
+
+            // Extract photo from the review
+            if (reviewWithPhoto && reviewWithPhoto.Photos && reviewWithPhoto.Photos.length > 0) {
+              const photo = reviewWithPhoto.Photos[0];
+              if (photo.photo_url) {
+                photoUrl = photo.photo_url;
+              } else if (photo.photo2_url) {
+                photoUrl = photo.photo2_url;
+              }
             }
           }
 

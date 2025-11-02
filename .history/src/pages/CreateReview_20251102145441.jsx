@@ -10,8 +10,8 @@ const CreateReview = () => {
   const [rating, setRating] = useState(0);
   const [studySpotName, setStudySpotName] = useState('');
   const [reviewText, setReviewText] = useState('');
-  const [uploadedImage, setUploadedImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,12 +59,9 @@ const CreateReview = () => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      // Create preview with object URL (instant)
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
 
@@ -240,77 +237,74 @@ const CreateReview = () => {
         throw reviewError;
       }
 
+      // If there's an uploaded image, save it to Supabase Storage first
+      if (imageFile && reviewData) {
+        console.log('Uploading photo to storage...');
+        
+        try {
+          // Create unique filename
+          const fileExt = imageFile.name.split('.').pop();
+          const fileName = `${reviewData.review_id}_${Date.now()}.${fileExt}`;
+          
+          // Upload to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('ReviewPhotos')
+            .upload(fileName, imageFile, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error('Error uploading to storage:', uploadError);
+            // If storage fails, continue without photo
+          } else {
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('ReviewPhotos')
+              .getPublicUrl(fileName);
+
+            const photoUrl = urlData.publicUrl;
+
+            // Get the highest photo_id to generate the next one
+            const { data: maxPhotoData } = await supabase
+              .from('Photos')
+              .select('photo_id')
+              .order('photo_id', { ascending: false })
+              .limit(1);
+            
+            const nextPhotoId = maxPhotoData && maxPhotoData.length > 0 ? maxPhotoData[0].photo_id + 1 : 1;
+
+            // Save photo URL to database
+            const { error: photoError } = await supabase
+              .from('Photos')
+              .insert({
+                photo_id: nextPhotoId,
+                review_id: reviewData.review_id,
+                photo_url: photoUrl,
+                uploaded_at: new Date().toISOString()
+              });
+
+            if (photoError) {
+              console.error('Error saving photo to database:', photoError);
+            } else {
+              console.log('Photo uploaded successfully!');
+            }
+          }
+        } catch (err) {
+          console.error('Unexpected error during photo upload:', err);
+        }
+      }
+
       // Update the average rating for the study spot
       await updateSpotAverageRating(spotId);
 
-      // Navigate immediately - don't wait for photo upload
+      // Navigate back to reviews feed
       navigate('/reviews');
-
-      // Upload photo in background if exists
-      if (imageFile && reviewData) {
-        uploadPhotoToStorage(imageFile, reviewData.review_id);
-      }
     } catch (error) {
       console.error('Error creating review:', error);
       setError(error.message || 'Failed to create review. Please try again.');
+    } finally {
       setLoading(false);
-    }
-  };
-
-  const uploadPhotoToStorage = async (file, reviewId) => {
-    try {
-      console.log('Uploading photo to storage...');
-      
-      // Create unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${reviewId}_${Date.now()}.${fileExt}`;
-      
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('ReviewPhotos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Error uploading to storage:', uploadError);
-        return;
-      }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('ReviewPhotos')
-        .getPublicUrl(fileName);
-
-      const photoUrl = urlData.publicUrl;
-
-      // Get the highest photo_id
-      const { data: maxPhotoData } = await supabase
-        .from('Photos')
-        .select('photo_id')
-        .order('photo_id', { ascending: false })
-        .limit(1);
-      
-      const nextPhotoId = maxPhotoData && maxPhotoData.length > 0 ? maxPhotoData[0].photo_id + 1 : 1;
-
-      // Save photo URL to database
-      const { error: photoError } = await supabase
-        .from('Photos')
-        .insert({
-          photo_id: nextPhotoId,
-          review_id: reviewId,
-          photo_url: photoUrl,
-          uploaded_at: new Date().toISOString()
-        });
-
-      if (photoError) {
-        console.error('Error saving photo to database:', photoError);
-      } else {
-        console.log('Photo uploaded successfully!');
-      }
-    } catch (err) {
-      console.error('Unexpected error during photo upload:', err);
     }
   };
 
@@ -406,10 +400,10 @@ const CreateReview = () => {
               </div>
               
               <div className="image-upload-section">
-                {uploadedImage ? (
+                {imagePreview ? (
                   <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                     <img 
-                      src={uploadedImage} 
+                      src={imagePreview} 
                       alt="Upload preview" 
                       style={{ 
                         width: '100%', 
@@ -420,8 +414,8 @@ const CreateReview = () => {
                     />
                     <button
                       onClick={() => {
-                        setUploadedImage(null);
                         setImageFile(null);
+                        setImagePreview(null);
                       }}
                       style={{
                         position: 'absolute',

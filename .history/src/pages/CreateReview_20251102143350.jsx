@@ -10,8 +10,7 @@ const CreateReview = () => {
   const [rating, setRating] = useState(0);
   const [studySpotName, setStudySpotName] = useState('');
   const [reviewText, setReviewText] = useState('');
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [locations, setLocations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,16 +55,28 @@ const CreateReview = () => {
   };
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      // Create preview with object URL (instant)
+    const files = Array.from(e.target.files);
+    
+    // Limit to 2 images total
+    const remainingSlots = 2 - uploadedImages.length;
+    const filesToProcess = files.slice(0, remainingSlots);
+    
+    if (files.length > remainingSlots) {
+      setError(`You can only upload ${remainingSlots} more image(s). Maximum 2 images total.`);
+      setTimeout(() => setError(''), 3000);
+    }
+    
+    filesToProcess.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result);
+        setUploadedImages(prev => [...prev, reader.result]);
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeImage = (index) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -240,77 +251,57 @@ const CreateReview = () => {
         throw reviewError;
       }
 
+      // If there are uploaded images, save them to Photos table
+      if (uploadedImages.length > 0 && reviewData) {
+        console.log(`Uploading ${uploadedImages.length} photo(s)...`);
+        
+        for (let i = 0; i < uploadedImages.length; i++) {
+          // Get the highest photo_id to generate the next one
+          const { data: maxPhotoData } = await supabase
+            .from('Photos')
+            .select('photo_id')
+            .order('photo_id', { ascending: false })
+            .limit(1);
+          
+          const nextPhotoId = maxPhotoData && maxPhotoData.length > 0 ? maxPhotoData[0].photo_id + 1 : 1;
+          console.log(`Next photo ID will be: ${nextPhotoId}`);
+
+          // Store in photo_url for first image, photo2_url for second image
+          const photoData = {
+            photo_id: nextPhotoId,
+            review_id: reviewData.review_id,
+            uploaded_at: new Date().toISOString()
+          };
+
+          if (i === 0) {
+            photoData.photo_url = uploadedImages[0];
+          }
+          if (i === 1 && uploadedImages[1]) {
+            photoData.photo2_url = uploadedImages[1];
+          }
+
+          const { error: photoError } = await supabase
+            .from('Photos')
+            .insert(photoData);
+
+          if (photoError) {
+            console.error(`Error uploading photo ${i + 1}:`, photoError);
+          } else {
+            console.log(`Photo ${i + 1} uploaded successfully with ID:`, nextPhotoId);
+          }
+        }
+      }
+
       // Update the average rating for the study spot
       await updateSpotAverageRating(spotId);
 
-      // Navigate immediately - don't wait for photo upload
+      // Navigate back to reviews feed
       navigate('/reviews');
-
-      // Upload photo in background if exists
-      if (imageFile && reviewData) {
-        uploadPhotoToStorage(imageFile, reviewData.review_id);
-      }
     } catch (error) {
       console.error('Error creating review:', error);
       setError(error.message || 'Failed to create review. Please try again.');
+    } finally {
       setLoading(false);
-    }
-  };
-
-  const uploadPhotoToStorage = async (file, reviewId) => {
-    try {
-      console.log('Uploading photo to storage...');
-      
-      // Create unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${reviewId}_${Date.now()}.${fileExt}`;
-      
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('ReviewPhotos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Error uploading to storage:', uploadError);
-        return;
-      }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('ReviewPhotos')
-        .getPublicUrl(fileName);
-
-      const photoUrl = urlData.publicUrl;
-
-      // Get the highest photo_id
-      const { data: maxPhotoData } = await supabase
-        .from('Photos')
-        .select('photo_id')
-        .order('photo_id', { ascending: false })
-        .limit(1);
-      
-      const nextPhotoId = maxPhotoData && maxPhotoData.length > 0 ? maxPhotoData[0].photo_id + 1 : 1;
-
-      // Save photo URL to database
-      const { error: photoError } = await supabase
-        .from('Photos')
-        .insert({
-          photo_id: nextPhotoId,
-          review_id: reviewId,
-          photo_url: photoUrl,
-          uploaded_at: new Date().toISOString()
-        });
-
-      if (photoError) {
-        console.error('Error saving photo to database:', photoError);
-      } else {
-        console.log('Photo uploaded successfully!');
-      }
-    } catch (err) {
-      console.error('Unexpected error during photo upload:', err);
     }
   };
 
@@ -406,38 +397,76 @@ const CreateReview = () => {
               </div>
               
               <div className="image-upload-section">
-                {uploadedImage ? (
-                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <img 
-                      src={uploadedImage} 
-                      alt="Upload preview" 
-                      style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        objectFit: 'cover',
-                        borderRadius: '20px'
-                      }} 
-                    />
-                    <button
-                      onClick={() => {
-                        setUploadedImage(null);
-                        setImageFile(null);
-                      }}
-                      style={{
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        background: 'rgba(0, 0, 0, 0.7)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '30px',
-                        height: '30px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      ×
-                    </button>
+                {uploadedImages.length > 0 ? (
+                  <div style={{ 
+                    display: 'grid',
+                    gridTemplateColumns: uploadedImages.length === 1 ? '1fr' : '1fr 1fr',
+                    gap: '10px',
+                    width: '100%',
+                    height: '100%'
+                  }}>
+                    {uploadedImages.map((image, index) => (
+                      <div key={index} style={{ position: 'relative', width: '100%', height: '100%' }}>
+                        <img 
+                          src={image} 
+                          alt={`Upload preview ${index + 1}`} 
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            borderRadius: '20px'
+                          }} 
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            background: 'rgba(0, 0, 0, 0.7)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '30px',
+                            height: '30px',
+                            cursor: 'pointer',
+                            fontSize: '18px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    {uploadedImages.length < 2 && (
+                      <label style={{
+                        border: '2px dashed rgba(255, 255, 255, 0.3)',
+                        borderRadius: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '14px',
+                        minHeight: uploadedImages.length === 1 ? '100%' : 'auto'
+                      }}>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          multiple
+                          hidden
+                        />
+                        <span style={{ fontSize: '32px' }}>📷</span>
+                        <span>Add {uploadedImages.length === 0 ? 'photos' : 'another'}</span>
+                        <span style={{ fontSize: '12px', marginTop: '5px' }}>
+                          ({uploadedImages.length}/2)
+                        </span>
+                      </label>
+                    )}
                   </div>
                 ) : (
                   <label className="upload-placeholder">
@@ -445,10 +474,11 @@ const CreateReview = () => {
                       type="file" 
                       accept="image/*"
                       onChange={handleImageUpload}
+                      multiple
                       hidden
                     />
                     <span>📷</span>
-                    <span>Click to upload image</span>
+                    <span>Click to upload images (max 2)</span>
                   </label>
                 )}
               </div>
