@@ -127,6 +127,93 @@ nav {
   line-height: 1.6;
 }
 
+/* Creators Section */
+.creators-section {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 900px;
+  margin: 3rem auto;
+  animation: fadeInUp 1.2s ease;
+}
+
+.creators-section h2 {
+  color: #333;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  font-weight: 700;
+}
+
+.creators-grid {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.creator-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.creator-card:hover {
+  transform: translateY(-5px);
+}
+
+.creator-image {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.creator-card:hover .creator-image {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.creator-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.creator-image svg {
+  width: 60px;
+  height: 60px;
+  color: #999;
+}
+
+.creator-name {
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .creators-grid {
+    gap: 2rem;
+  }
+
+  .creator-image {
+    width: 110px;
+    height: 110px;
+  }
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {
@@ -175,4 +262,5 @@ nav {
     width: 100%;
     max-width: 400px;
   }
+
 }

@@ -67,6 +67,15 @@ const LandingPage = () => {
     navigate('/login');
   };
 
+  const creators = [
+    {name: "Amy Tran", image: "src/assets/AmyTran.jpeg", linkedin: "https://www.linkedin.com/in/amy-tran-1a7196273/"},
+    {name: "Ashley Zheng", image: "src/assets/AshleyZheng.png", linkedin: "https://www.linkedin.com/in/ashleyxzheng/"},
+    {name: "Isabel Larenas", image: "src/assets/IsabelLarenas.jpg", linkedin: "https://www.linkedin.com/in/isabellarenas/"},
+    {name: "Maya Borkar", image: "src/assets/MayaBorkar.png", linkedin: "https://www.linkedin.com/in/maya-borkar/"},
+    {name: "Tim Bernardo", image: "src/assets/TimBernardo.png", linkedin: "https://www.linkedin.com/in/timothybernardo/"},
+    {name: "James Khadan", image: "src/assets/JamesKhadan.jpeg", linkedin: "https://www.linkedin.com/in/jameskhadan/"}
+  ];
+
   return (
     <>
       <header>
@@ -96,6 +105,33 @@ const LandingPage = () => {
           <div className="info-card">
             <h2>Descriptions</h2>
             <p>Discover various study spaces with detailed descriptions and amenities found by other Northeastern students.</p>
+          </div>
+        </div>
+
+        <div className="creators-section">
+          <h2>The Creators</h2>
+          <div className="creators-grid">
+            {creators.map((creator, index) => (
+              <a 
+                key={index} 
+                href={creator.linkedin} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="creator-card"
+              >
+                <div className="creator-image">
+                  {creator.image ? (
+                    <img src={creator.image} alt={creator.name} />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  )}
+                </div>
+                <div className="creator-name">{creator.name}</div>
+              </a>
+            ))}
           </div>
         </div>
       </main>
