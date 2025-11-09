@@ -18,9 +18,9 @@ const ReviewsFeed = () => {
 
   // Helper function to extract images from photos
   const getReviewImages = (photos) => {
-    if (!photos || photos.length === 0) {
-      return ['https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600'];
-    }
+  if (!photos || photos.length === 0) {
+    return [];
+  }
 
     const images = [];
     photos.forEach(photo => {
@@ -28,7 +28,7 @@ const ReviewsFeed = () => {
       if (photo.photo2_url) images.push(photo.photo2_url);
     });
 
-    return images.length > 0 ? images : ['https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600'];
+    return images;
   };
 
   const fetchReviews = async () => {
@@ -36,7 +36,7 @@ const ReviewsFeed = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch reviews with ALL related data including location info
+      // Fetch reviews with ALL related data including profile pictures
       const { data, error } = await supabase
         .from('Reviews')
         .select(`
@@ -49,17 +49,12 @@ const ReviewsFeed = () => {
           Users!inner (
             user_id,
             username,
-            email,
-            profile_picture_url
+            email
           ),
           StudySpot (
             name,
             average_rating,
-            location_id,
-            Locations (
-              location_id,
-              "building/area"
-            )
+            location_id
           ),
           Photos (
             photo_id,
@@ -72,23 +67,38 @@ const ReviewsFeed = () => {
 
       if (error) throw error;
 
+      // Now fetch profile pictures for all users
+      const userIds = [...new Set(data.map(review => review.user_id))];
+      
+      const { data: profilesData } = await supabase
+        .from('UserProfiles')
+        .select('user_id, profile_picture_url')
+        .in('user_id', userIds);
+
+      // Create a map of user_id to profile picture
+      const profilePicMap = {};
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          if (profile.profile_picture_url) {
+            profilePicMap[profile.user_id] = profile.profile_picture_url;
+          }
+        });
+      }
+
       // Transform the data to match component structure
       const transformedReviews = (data || []).map(review => ({
         id: review.review_id,
         username: review.Users?.username || review.Users?.email?.split('@')[0] || 'anonymous',
         rating: review.rating,
         images: getReviewImages(review.Photos),
-        studySpotName: review.StudySpot?.name || 'Unknown Study Spot',
-        locationId: review.StudySpot?.location_id || null,
-        locationName: review.StudySpot?.Locations?.['building/area'] || 'Unknown Location',
+        studySpotName: review.StudySpot?.name || 'Unknown Location',
         review: review.review_text,
         spotId: review.spot_id,
         createdAt: review.created_at,
-        profilePic: review.Users?.profile_picture_url || null
+        profilePic: profilePicMap[review.user_id] || null
       }));
 
       setReviews(transformedReviews);
-      console.log('Transformed reviews:', transformedReviews);
     } catch (error) {
       console.error('Error fetching reviews:', error);
       setError(error.message);
@@ -233,10 +243,6 @@ const ReviewsFeed = () => {
                             height: '100%', 
                             objectFit: 'cover' 
                           }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.parentElement.innerHTML = '<span class="avatar-icon">👤</span>';
-                          }}
                         />
                       ) : (
                         <span className="avatar-icon">👤</span>
@@ -251,9 +257,6 @@ const ReviewsFeed = () => {
                       src={review.images[currentImageIndex[review.id] || 0]} 
                       alt="Study spot"
                       className="review-image"
-                      onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600';
-                      }}
                     />
                     {review.images.length > 1 && (
                       <>
@@ -279,39 +282,10 @@ const ReviewsFeed = () => {
                 <div className="review-right">
                   <h3 
                     className="study-spot-name"
-                    style={{ 
-                      cursor: 'default',
-                      marginBottom: '5px'
-                    }}
+                    onClick={() => review.spotId && navigate(`/studyspot/${review.spotId}`)}
                   >
                     {review.studySpotName}
                   </h3>
-                  <p 
-                    className="location-name"
-                    onClick={() => review.locationId && navigate(`/location/${review.locationId}`)}
-                    style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      marginBottom: '20px',
-                      cursor: 'pointer',
-                      display: 'inline-block',
-                      padding: '5px 10px',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      borderRadius: '15px',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-                      e.target.style.transform = 'translateX(5px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                      e.target.style.transform = 'translateX(0)';
-                    }}
-                  >
-                    📍 {review.locationName}
-                  </p>
                   <div className="review-text">
                     <p>{review.review || 'No review text provided.'}</p>
                     {review.createdAt && (

@@ -26,54 +26,42 @@ const ProfilePage = () => {
   }, [user]);
   
   const loadProfile = async () => {
-    if (!user) return;
-    
-    try {
-      // First, check if user exists in Users table by email
-      const { data: userData, error: userCheckError } = await supabase
-        .from('Users')
-        .select('user_id, bio, profile_picture_url')
-        .eq('email', user.email)
-        .maybeSingle();
-      
-      let userId;
-      
-      if (!userData) {
-        // Create user if doesn't exist
-        const { data: maxUserData } = await supabase
-          .from('Users')
-          .select('user_id')
-          .order('user_id', { ascending: false })
-          .limit(1);
-        
-        const nextUserId = maxUserData && maxUserData.length > 0 ? maxUserData[0].user_id + 1 : 1;
-        
-        await supabase
-          .from('Users')
-          .insert({
-            user_id: nextUserId,
-            email: user.email,
-            username: user.email.split('@')[0],
-            password_hash: 'SUPABASE_AUTH',
-            bio: 'Add your bio here!',
-            created_at: new Date().toISOString()
-          });
-        
-        userId = nextUserId;
-      } else {
-        userId = userData.user_id;
-        // Load existing bio and profile picture
-        setBio(userData.bio || 'Add your bio here!');
-        setProfilePic(userData.profile_picture_url || null);
-        console.log("Loaded profile data");
-      }
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      setLoading(false);
+  if (!user) return;
+
+  try {
+    // Try to find existing user in the Users table
+    const { data: userData, error } = await supabase
+      .from('Users')
+      .select('*')
+      .eq('email', user.email)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (userData) {
+      // Found an existing record
+      setBio(userData.bio || 'Add your bio here!');
+      setProfilePic(userData.profile_picture_url || null);
+    } else {
+      // Create a new user record if not found
+      const { error: insertError } = await supabase.from('Users').insert({
+        email: user.email,
+        username: user.email.split('@')[0],
+        password_hash: 'SUPABASE_AUTH',
+        bio: 'Add your bio here!',
+        created_at: new Date().toISOString(),
+      });
+
+      if (insertError) throw insertError;
     }
-  };
+
+    setLoading(false);
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    setLoading(false);
+  }
+};
+
   
   const fetchUserReviews = async () => {
     if (!user) return;
@@ -126,7 +114,7 @@ const ProfilePage = () => {
         }
         
         // Use first image for grid display, or default
-        const gridImage = images.length > 0 ? images[0] : null;
+       const gridImage = images.length > 0 ? images[0] : null;
         return {
           review_id: review.review_id,
           gridImage: gridImage,
@@ -152,49 +140,28 @@ const ProfilePage = () => {
   };
 
   const handleSaveProfile = async () => {
-    if (!user) return;
-    
-    try {
-      // Get user_id
-      const { data: userData, error: userError } = await supabase
-        .from('Users')
-        .select('user_id')
-        .eq('email', user.email)
-        .single();
-      
-      if (userError || !userData) {
-        console.error('Error finding user:', userError);
-        alert('User not found');
-        return;
-      }
-      
-      console.log('Updating user_id:', userData.user_id, 'with bio:', bio);
-      
-      // Use UPDATE not UPSERT - the user already exists!
-      const { data, error } = await supabase
-        .from('Users')
-        .update({
-          bio: bio,
-          profile_picture_url: profilePic
-        })
-        .eq('user_id', userData.user_id)
-        .select();
-      
-      console.log('Update response:', data);
-      
-      if (error) {
-        console.error('Update error:', error);
-        alert('Failed to save: ' + error.message);
-        return;
-      }
-      
-      setIsEditing(false);
-      alert('Profile saved successfully!');
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      alert('Failed to save profile: ' + error.message);
-    }
-  };
+  if (!user) return;
+
+  try {
+    const { error } = await supabase
+      .from('Users')
+      .update({
+        bio,
+        profile_picture_url: profilePic,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('email', user.email);
+
+    if (error) throw error;
+
+    setIsEditing(false);
+    alert('Profile updated successfully!');
+  } catch (error) {
+    console.error('Error saving profile:', error);
+    alert('Failed to save profile');
+  }
+};
+
 
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
@@ -220,7 +187,6 @@ const ProfilePage = () => {
         .getPublicUrl(`profiles/${fileName}`);
       
       setProfilePic(urlData.publicUrl);
-      console.log('Profile picture uploaded:', urlData.publicUrl);
     } catch (error) {
       console.error('Error uploading profile picture:', error);
       // Fallback to base64 for display
@@ -609,6 +575,7 @@ const ProfilePage = () => {
                     }}>
                       Posted on {new Date(selectedReview.createdAt).toLocaleDateString()}
                     </p>
+                
                   </div>
                 </div>
               </div>

@@ -32,7 +32,7 @@ const ProfilePage = () => {
       // First, check if user exists in Users table by email
       const { data: userData, error: userCheckError } = await supabase
         .from('Users')
-        .select('user_id, bio, profile_picture_url')
+        .select('user_id')
         .eq('email', user.email)
         .maybeSingle();
       
@@ -55,17 +55,33 @@ const ProfilePage = () => {
             email: user.email,
             username: user.email.split('@')[0],
             password_hash: 'SUPABASE_AUTH',
-            bio: 'Add your bio here!',
             created_at: new Date().toISOString()
           });
         
         userId = nextUserId;
       } else {
         userId = userData.user_id;
-        // Load existing bio and profile picture
-        setBio(userData.bio || 'Add your bio here!');
-        setProfilePic(userData.profile_picture_url || null);
-        console.log("Loaded profile data");
+      }
+      
+      // Check if UserProfiles entry exists
+      const { data: profileData, error: profileError } = await supabase
+        .from('Users')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (profileData) {
+        setBio(profileData.bio || 'Add your bio here!');
+        setProfilePic(profileData.profile_picture_url || null);
+      } else {
+        // Create profile if it doesn't exist
+        await supabase
+          .from('Users')
+          .insert({
+            user_id: userId,
+            bio: 'Add your bio here!',
+            created_at: new Date().toISOString()
+          });
       }
       
       setLoading(false);
@@ -126,7 +142,7 @@ const ProfilePage = () => {
         }
         
         // Use first image for grid display, or default
-        const gridImage = images.length > 0 ? images[0] : null;
+       const gridImage = images.length > 0 ? images[0] : null;
         return {
           review_id: review.review_id,
           gridImage: gridImage,
@@ -156,43 +172,36 @@ const ProfilePage = () => {
     
     try {
       // Get user_id
-      const { data: userData, error: userError } = await supabase
+      const { data: userData } = await supabase
         .from('Users')
         .select('user_id')
         .eq('email', user.email)
         .single();
       
-      if (userError || !userData) {
-        console.error('Error finding user:', userError);
+      if (!userData) {
         alert('User not found');
         return;
       }
       
-      console.log('Updating user_id:', userData.user_id, 'with bio:', bio);
-      
-      // Use UPDATE not UPSERT - the user already exists!
-      const { data, error } = await supabase
+      // Update or insert profile data
+      const { error } = await supabase
         .from('Users')
-        .update({
+        .upsert({
+          user_id: userData.user_id,
           bio: bio,
-          profile_picture_url: profilePic
-        })
-        .eq('user_id', userData.user_id)
-        .select();
+          profile_picture_url: profilePic,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
       
-      console.log('Update response:', data);
-      
-      if (error) {
-        console.error('Update error:', error);
-        alert('Failed to save: ' + error.message);
-        return;
-      }
+      if (error) throw error;
       
       setIsEditing(false);
       alert('Profile saved successfully!');
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile: ' + error.message);
+      alert('Failed to save profile');
     }
   };
 
@@ -220,7 +229,6 @@ const ProfilePage = () => {
         .getPublicUrl(`profiles/${fileName}`);
       
       setProfilePic(urlData.publicUrl);
-      console.log('Profile picture uploaded:', urlData.publicUrl);
     } catch (error) {
       console.error('Error uploading profile picture:', error);
       // Fallback to base64 for display
@@ -609,6 +617,7 @@ const ProfilePage = () => {
                     }}>
                       Posted on {new Date(selectedReview.createdAt).toLocaleDateString()}
                     </p>
+                
                   </div>
                 </div>
               </div>
