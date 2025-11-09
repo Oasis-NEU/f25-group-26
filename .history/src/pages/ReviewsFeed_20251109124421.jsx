@@ -18,9 +18,9 @@ const ReviewsFeed = () => {
 
   // Helper function to extract images from photos
   const getReviewImages = (photos) => {
-  if (!photos || photos.length === 0) {
-    return [];
-  }
+    if (!photos || photos.length === 0) {
+      return ['https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600'];
+    }
 
     const images = [];
     photos.forEach(photo => {
