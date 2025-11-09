@@ -1,4 +1,4 @@
-/* SearchPage.css - Modern Purple Theme */
+/* SearchPage.css - Modern Blue Theme */
 .search-container {
   min-height: 100vh;
   background: var(--subtle-gradient);
@@ -6,7 +6,7 @@
 }
 
 .search-header {
-  background: linear-gradient(90deg, #6b5b95 0%, #8b7fb8 100%);
+  background: linear-gradient(90deg, #275dad 0%, #99b2dd 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -27,7 +27,7 @@
 }
 
 .search-content {
-  background: var(--dark-purple);
+  background: var(--dark-blue);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -62,7 +62,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--light-purple);
+  border-color: var(--primary-blue);
   background: white;
   box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
   transform: translateY(-2px);
@@ -75,7 +75,7 @@
 }
 
 .spot-result {
-  background: var(--light-purple);
+  background: var(--primary-blue);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
@@ -110,7 +110,7 @@
 }
 
 .spot-result:hover {
-  background: var(--primary-purple);
+  background: var(--light-cream);
   transform: translateX(10px) scale(1.02);
   box-shadow: 0 10px 30px rgba(107, 91, 149, 0.3);
 }

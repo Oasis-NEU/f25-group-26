@@ -4,7 +4,7 @@
 }
 
 .studyspot-header {
-  background: linear-gradient(90deg, #2d1b69 0%, #5a4b8c 100%);
+  background: linear-gradient(90deg, #275dad 0%, #99b2dd 100%);
   padding: 20px 30px;
   display: flex;
   justify-content: space-between;
@@ -18,7 +18,7 @@
 }
 
 .studyspot-content {
-  background: #6b5b95;
+  background: #275dad;
   border-radius: 20px;
   padding: 40px;
 }

@@ -1,7 +1,7 @@
 /* LoginPage.css - Simple Modern Purple Theme */
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f0f8 0%, #ede4f3 100%);
+  background: linear-gradient(135deg, #e7e5d5 0%, #e7e5d5 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,7 +19,7 @@
 }
 
 .login-header {
-  background: linear-gradient(90deg, #6b5b95 0%, #8b7fb8 100%);
+  background: linear-gradient(90deg, #275dad 0%, #99b2dd 100%);
   padding: 25px 35px;
   display: flex;
   justify-content: space-between;
@@ -41,7 +41,7 @@
 }
 
 .header-login-btn {
-  background: linear-gradient(135deg, #e8a5b6, #d6889c);
+  background: linear-gradient(135deg, #e7e5d5, #7e6551);
   color: white;
   border: none;
   padding: 10px 28px;
@@ -54,7 +54,7 @@
 
 .header-login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(232, 165, 182, 0.4);
+  box-shadow: 0 6px 20px rgba(122, 128, 177, 0.4);
 }
 
 .login-content {
@@ -63,14 +63,14 @@
 }
 
 .login-form-container {
-  background: rgba(212, 165, 181, 0.15);
+  background: rgba(202, 184, 159, 0.15);
   border-radius: 20px;
   padding: 40px 35px;
   text-align: center;
 }
 
 .login-form-container h2 {
-  color: #6b5b95;
+  color: #275dad;
   margin-bottom: 35px;
   font-size: 32px;
   font-weight: 800;
@@ -92,8 +92,8 @@
 
 .login-input:focus {
   background: white;
-  border-color: #a694c1;
-  box-shadow: 0 4px 15px rgba(166, 148, 193, 0.2);
+  border-color: #99b2dd;
+  box-shadow: 0 4px 15px rgba(#99b2dd, 0.2);
   transform: translateY(-1px);
 }
 
@@ -104,7 +104,7 @@
 .signup-link {
   text-align: left;
   margin: 15px 0 25px;
-  color: #6b5b95;
+  color: #99b2dd;
   font-size: 15px;
   font-weight: 500;
 }
@@ -112,7 +112,7 @@
 .link-button {
   background: none;
   border: none;
-  color: #8b7fb8;
+  color: #99b2dd;
   text-decoration: underline;
   cursor: pointer;
   font-weight: 700;
@@ -120,12 +120,12 @@
 }
 
 .link-button:hover {
-  color: #6b5b95;
+  color: #99b2dd;
 }
 
 .login-submit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #6b5b95 0%, #8b7fb8 100%);
+  background: linear-gradient(135deg, #275dad 0%, #99b2dd 100%);
   color: white;
   border: none;
   padding: 16px;
@@ -134,14 +134,14 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(107, 91, 149, 0.25);
+  box-shadow: 0 6px 20px rgba(#99b2dd, 0.25);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .login-submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(107, 91, 149, 0.35);
+  box-shadow: 0 8px 25px rgba(#99b2dd, 0.35);
 }
 
 .login-submit-btn:active {
