@@ -618,7 +618,28 @@ const ProfilePage = () => {
                     }}>
                       Posted on {new Date(selectedReview.createdAt).toLocaleDateString()}
                     </p>
-                
+                    
+                    <button
+                      onClick={() => {
+                        closeReviewModal();
+                        navigate(`/studyspot/${selectedReview.spotId}`);
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #e8a5b6, #d6889c)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                      View Study Spot
+                    </button>
                   </div>
                 </div>
               </div>
