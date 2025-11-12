@@ -189,7 +189,7 @@ const LocationDetail = () => {
           </button>
 
           <div className="review-card-full" style={{
-            background: 'linear-gradient(135deg, #6b5b95 0%, #8b7fb8 100%)',
+            background: 'linear-gradient(135deg, #275dad 0%, #99b2dd 100%)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '30px',

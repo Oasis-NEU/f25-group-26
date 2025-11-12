@@ -1,0 +1,74 @@
+.studyspot-container {
+  min-height: 100vh;
+  background: #f0f0f0;
+}
+
+.studyspot-header {
+  background: linear-gradient(90deg, #2d1b69 0%, #5a4b8c 100%);
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.studyspot-main {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.studyspot-content {
+  background: #6b5b95;
+  border-radius: 20px;
+  padding: 40px;
+}
+
+.spot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.spot-info h2 {
+  color: white;
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.spot-hours, .spot-address {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  margin: 5px 0;
+}
+
+.spot-rating {
+  text-align: right;
+  color: white;
+}
+
+.spot-rating .stars {
+  margin-top: 10px;
+}
+
+.spot-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.spot-images img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.reviews-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  color: white;
+}

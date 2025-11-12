@@ -1,0 +1,104 @@
+.create-review-container {
+  min-height: 100vh;
+  background: #f0f0f0;
+}
+
+.create-review-header {
+  background: linear-gradient(90deg, #2d1b69 0%, #5a4b8c 100%);
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.create-review-main {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.create-review-card {
+  background: #6b5b95;
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+}
+
+.post-review-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: #e8a5b6;
+  color: #333;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-form-content {
+  display: flex;
+  gap: 30px;
+}
+
+.form-left {
+  flex: 0 0 400px;
+}
+
+.rating-selector {
+  margin: 20px 0;
+}
+
+.image-upload-section {
+  width: 100%;
+  height: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #4a3d6b;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  font-size: 18px;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.form-right {
+  flex: 1;
+  background: #a694c1;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.spot-name-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 350px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 16px;
+  resize: vertical;
+}

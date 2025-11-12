@@ -468,7 +468,7 @@ const ProfilePage = () => {
             className="review-modal"
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'linear-gradient(135deg, #6b5b95 0%, #8b7fb8 100%)',
+              background: 'linear-gradient(135deg, #275dad 0%, #99b2dd 100%)',
               borderRadius: '30px',
               padding: '35px',
               maxWidth: '900px',
