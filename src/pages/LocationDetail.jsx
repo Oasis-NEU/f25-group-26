@@ -267,9 +267,7 @@ const LocationDetail = () => {
                     fontSize: '28px',
                     fontWeight: '700',
                     marginBottom: '25px',
-                    cursor: 'pointer'
                   }}
-                  onClick={() => navigate(`/studyspot/${selectedReview.spotId}`)}
                 >
                   {selectedReview.spotName}
                 </h3>
@@ -319,7 +317,24 @@ const LocationDetail = () => {
           <button onClick={handleLogout} className="logout-btn">Log-Out</button>
         </header>
         <main className="location-main">
-          <div className="location-content">
+          <button 
+          onClick={() => navigate('/search')}
+          style={{
+            background: 'linear-gradient(135deg, #7e6551, #7e6551)',
+            color: 'white',
+            border: 'none',
+            padding: '12px 28px',
+            borderRadius: '30px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            marginBottom: '20px',
+            transition: 'all 0.3s ease'
+    }}
+  >
+    ← Back to Search
+  </button>
+  <div className="location-content">
             <h2 style={{ color: 'white', textAlign: 'center' }}>Loading...</h2>
           </div>
         </main>
@@ -413,13 +428,20 @@ const LocationDetail = () => {
                   <div className="grid-item-overlay">
                     <div className="overlay-content">
                       <div className="overlay-spot-name">{review.spotName}</div>
-                      <div className="overlay-stats">
-                        <div className="overlay-rating">
-                          {renderStars(review.rating)}
-                        </div>
-                        <div className="overlay-username">@{review.username}</div>
-                      </div>
+                      <div style={{ 
+                        color: 'rgba(255, 255, 255, 0.8)', 
+                        fontSize: '12px',
+                        marginBottom: '5px'
+                      }}>
+                        📍 {locationData.name}
                     </div>
+                    <div className="overlay-stats">
+                    <div className="overlay-rating">
+                      {renderStars(review.rating)}
+                     </div>
+                  <div className="overlay-username">@{review.username}</div>
+                    </div>
+                  </div>
                   </div>
                 </div>
               ))}
