@@ -1,16 +1,56 @@
-# React + Vite
+# 📚 StudySphere
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web application for Northeastern University students to discover, review, and share study spaces on campus.
 
-Currently, two official plugins are available:
+### **[Live Demo →](https://study-spheres.netlify.app/)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
+![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Study Spots
+- Browse study locations across Northeastern's campus
+- Filter spots by building or area
 
-## Expanding the ESLint configuration
+### Reviews & Ratings
+- Read reviews from other Northeastern students
+- Rate study spots on a 5-star scale
+- Upload photos of study spaces
+- Share your experiences to help others find great spots
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### User Profiles
+- Create a personalized profile
+- View your review history in an Instagram-style grid
+- Track spots you've visited
+
+### Search & Discovery
+- Search for study spots by name or location
+- Discover new places recommended by other students
+
+## 🛠 Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Frontend | React, CSS |
+| Backend | Supabase (Auth, Database, Storage) |
+| Build Tool | Vite |
+| Routing | React Router |
+| Deployment | Netlify |
+
+## 🖼 Demo
+
+[![Demo](https://github.com/user-attachments/assets/78d7a6ee-2952-4f15-87b7-d50fe022d342)](https://www.youtube.com/watch?v=gwANHw4aOIE)
+
+## 👥 Team
+
+This project was created as part of Oasis at Northeastern University (Fall 2025, Group 26).
+
+## 🤝 Contact
+
+**Timothy Bernardo**  
+- GitHub: [@timothybernardo](https://github.com/timothybernardo)
+- LinkedIn: [timothybernardo](https://www.linkedin.com/in/timothybernardo)
+- Email: bernardo.t@northeastern.edu
