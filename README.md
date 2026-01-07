@@ -45,12 +45,7 @@ A web application for Northeastern University students to discover, review, and 
 [![Demo](https://github.com/user-attachments/assets/78d7a6ee-2952-4f15-87b7-d50fe022d342)](https://www.youtube.com/watch?v=gwANHw4aOIE)
 
 ## 👥 Team
+Maya Borkar, Timothy Bernardo, Isabel Larenas, Amy Tran, Ashley Zheng
 
 This project was created as part of Oasis at Northeastern University (Fall 2025, Group 26).
 
-## 🤝 Contact
-
-**Timothy Bernardo**  
-- GitHub: [@timothybernardo](https://github.com/timothybernardo)
-- LinkedIn: [timothybernardo](https://www.linkedin.com/in/timothybernardo)
-- Email: bernardo.t@northeastern.edu
